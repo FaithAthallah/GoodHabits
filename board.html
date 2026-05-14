@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SomeHabits — Habit Board</title>
+  <link rel="stylesheet" href="board-style.css" />
+  <link rel="icon" type="image/x-icon" href="img/th.jpeg">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="site-brand">
+      <a href="#" class="site-logo">SomeHabits</a>
+      <p class="site-tagline">Improve Your Life</p>
+    </div>
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="#" class="nav--active">Habit Board</a></li>
+        <li><a href="account.html" class="nav-link">👤 Account</a></li>
+      </ul>
+    </nav>
+    <button class="header-settings" id="open-settings-btn" aria-label="Settings">
+      ⚙️
+    </button>
+  </header>
+
+  <!-- ===== BOARD HERO ===== -->
+  <section class="board-hero">
+    <div class="board-hero__noise"></div>
+    <div class="board-hero__content">
+      <h1>Share Your Journey</h1>
+      <p>Post your experiences on habits and ask AI about them!</p>
+    </div>
+    <div class="board-hero__actions">
+      <div class="board-hero__count"><span id="post-count">0</span> posts shared</div>
+    </div>
+  </section>
+
+  <!-- ===== FILTER BAR ===== -->
+  <div class="filter-bar">
+    <div class="filter-bar__pills" id="filter-pills">
+      <button class="filter-pill filter-pill--active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="Fitness"> Fitness</button>
+      <button class="filter-pill" data-filter="Nutrition"> Nutrition</button>
+      <button class="filter-pill" data-filter="Mindfulness"> Mindfulness</button>
+      <button class="filter-pill" data-filter="Recovery"> Recovery</button>
+      <button class="filter-pill" data-filter="Morning Routine"> Morning Routine</button>
+      <button class="filter-pill" data-filter="Mental Health"> Mental Health</button>
+    </div>
+    <div class="filter-bar__sort">
+      <select id="sort-select" aria-label="Sort posts">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="likes">Most liked</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ===== BOARD ===== -->
+  <main class="board" id="board" aria-label="Habit posts board">
+    <!-- Cards injected by JS -->
+  </main>
+
+  <!-- ===== EMPTY STATE ===== -->
+  <div class="empty-state" id="empty-state" hidden>
+    <h3>No posts yet in this category</h3>
+    <p>Be the first to share a habit in this space.</p>
+  </div>
+
+  <!-- ===== FAB ===== -->
+  <button class="fab" id="fab-btn" aria-label="Add post">
+    <span class="fab__icon">+</span>
+    <span class="fab__label">Add Post</span>
+  </button>
+
+  <!-- ============================================================
+       CREATE POST MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="create-overlay" hidden></div>
+  <div class="modal" id="create-modal" role="dialog" aria-modal="true" aria-label="Create a post" hidden>
+    <div class="modal__header">
+      <h2 class="modal__title">Share Your Habit</h2>
+      <button class="modal__close" id="close-create-btn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal__body">
+      <form id="create-form" novalidate>
+
+        <!-- Author -->
+        <div class="form-group">
+          <label for="post-author">Your Name</label>
+          <input type="text" id="post-author" placeholder="E.g. Maya Okonkwo" maxlength="60" required />
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="post-category">Category</label>
+          <select id="post-category" required>
+            <option value="" disabled selected>Select a category…</option>
+            <option value="Fitness"> Fitness</option>
+            <option value="Nutrition"> Nutrition</option>
+            <option value="Mindfulness"> Mindfulness</option>
+            <option value="Recovery"> Recovery</option>
+            <option value="Morning Routine"> Morning Routine</option>
+            <option value="Mental Health"> Mental Health</option>
+          </select>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label for="post-title">Title</label>
+          <input type="text" id="post-title" placeholder="Give your post a headline…" maxlength="100" required />
+        </div>
+
+        <!-- Body -->
+        <div class="form-group">
+          <label for="post-body">Your Experience</label>
+          <textarea id="post-body" rows="5" placeholder="Share what you did, how it felt, and what you learned…" maxlength="1000" required></textarea>
+          <span class="char-count"><span id="body-count">0</span>/1000</span>
+        </div>
+
+        <!-- Image -->
+        <div class="form-group">
+          <label for="post-image">Photo (optional)</label>
+          <div class="image-drop" id="image-drop">
+            <input type="file" id="post-image" accept="image/*" />
+            <div class="image-drop__inner" id="image-drop-inner">
+              <span class="image-drop__icon">📷</span>
+              <p>Click or drag an image here</p>
+              <small>JPG, PNG, WebP — max 5MB</small>
+            </div>
+            <img class="image-drop__preview" id="image-preview" src="" alt="Preview" hidden />
+            <button type="button" class="image-drop__remove" id="remove-image-btn" hidden>✕ Remove photo</button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost-dark" id="cancel-create-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="submit-post-btn">Post to Board →</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       AI CHAT MODAL (per post)
+       ============================================================ -->
+  <div class="modal-overlay" id="ai-overlay" hidden></div>
+  <div class="modal modal--ai" id="ai-modal" role="dialog" aria-modal="true" aria-label="Ask AI about this post" hidden>
+    <div class="modal__header modal__header--dark">
+      <div class="modal__header-info">
+        <span class="modal__avatar">🤖</span>
+        <div>
+          <strong id="ai-modal-title">AI Trainer</strong>
+          <span class="modal__status">Powered by Claude · Online</span>
+        </div>
+      </div>
+      <button class="modal__close modal__close--light" id="close-ai-btn" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Post context preview inside modal -->
+    <div class="ai-post-context" id="ai-post-context"></div>
+
+    <div class="ai-chat__messages" id="ai-messages"></div>
+
+    <!-- Suggestion pills -->
+    <div class="ai-suggestions" id="ai-suggestions">
+      <button class="prompt-pill" data-prompt="What do you think about this habit?">What do you think?</button>
+      <button class="prompt-pill" data-prompt="Give me tips to improve this habit.">Tips to improve</button>
+      <button class="prompt-pill" data-prompt="What are the health benefits of this?">Health benefits</button>
+      <button class="prompt-pill" data-prompt="How can I make this a consistent daily habit?">Make it consistent</button>
+    </div>
+
+    <form class="ai-chat__form" id="ai-chat-form">
+      <input type="text" id="ai-chat-input" placeholder="Ask about this post…" autocomplete="off" />
+      <button type="submit" aria-label="Send">→</button>
+    </form>
+  </div>
+
+  <!-- ============================================================
+       SETTINGS MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="settings-overlay" hidden></div>
+  <div class="modal" id="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" hidden>
+    <div class="modal__header">
+      <h2 class="modal__title">Settings</h2>
+      <button class="modal__close" id="close-settings-btn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="form-group">
+        <label for="ai-provider-select">AI Provider</label>
+        <select id="ai-provider-select">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (GPT)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="api-key-input">API Key</label>
+        <input type="password" id="api-key-input" placeholder="Enter your API key" />
+        <small style="color: var(--ink-muted); margin-top: 0.3rem; display: block;">
+          <span id="key-help-anthropic">Get your free API key at <a href="https://console.anthropic.com" target="_blank" style="color: var(--accent);">console.anthropic.com</a></span>
+          <span id="key-help-openai" hidden>Get your API key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--accent);">platform.openai.com</a></span>
+        </small>
+      </div>
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+        <button type="button" class="btn btn--ghost-dark" id="clear-api-key-btn">Clear</button>
+        <button type="button" class="btn btn--primary" id="save-api-key-btn">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       IMAGE LIGHTBOX
+       ============================================================ -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox__close" id="lightbox-close" aria-label="Close image">✕</button>
+    <img class="lightbox__img" id="lightbox-img" src="" alt="" />
+  </div>
+
+  <script src="board.js"></script>
+</body>
+</html>
